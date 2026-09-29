@@ -1,0 +1,38 @@
+const express = require("express");
+const sql = require("mssql");
+const cors = require("cors");
+
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+const config = {
+  server: "localhost",
+  database: "MyApp",
+  user: "YOUR_SQL_USERNAME",
+  password: "YOUR_SQL_PASSWORD",
+  options: {
+    encrypt: false,
+    trustServerCertificate: true
+  }
+};
+
+app.get("/api/users", async (req, res) => {
+  try {
+    const pool = await sql.connect(config);
+
+    const result = await pool
+      .request()
+      .query("SELECT * FROM Users");
+
+    res.json(result.recordset);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+app.listen(5000, () => {
+  console.log("API running on http://localhost:5000");
+});
